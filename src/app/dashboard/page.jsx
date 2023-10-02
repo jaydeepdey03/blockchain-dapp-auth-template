@@ -9,7 +9,7 @@ import {
   useNetworkMismatch,
 } from "@thirdweb-dev/react";
 import {useRouter} from "next/navigation";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ export default function Dashboard() {
   const address = useAddress();
   const isMismatch = useNetworkMismatch();
   const disconnect = useDisconnect();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     if (!address) {
@@ -45,6 +46,8 @@ export default function Dashboard() {
     });
   };
 
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   return (
     <div className="h-screen w-screen flex justify-center items-center flex-col">
       <div className="absolute top-5 right-10">
