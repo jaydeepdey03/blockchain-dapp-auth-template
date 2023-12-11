@@ -8,7 +8,7 @@ export default function Home() {
       className="h-screen w-screen flex justify-center items-center flex-col"
       suppressHydrationWarning
     >
-      <p className="font-bold text-6xl m-4">
+      <p className="font-bold text-2xl m-4">
         Get Started with Metamask Auth (Built with Wagmi)
       </p>
       <Button onClick={() => router.push("/connectwallet")}>Get Started</Button>
