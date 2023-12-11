@@ -28,7 +28,7 @@ export default function SwitchNetwork() {
     }
 
     console.log(chain);
-  }, [isConnected, router]);
+  }, [isConnected, router, chain]);
 
   if (error) {
     toast({
