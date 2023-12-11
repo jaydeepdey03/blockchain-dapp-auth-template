@@ -2,12 +2,6 @@
 
 import {ModeToggle} from "@/components/Toggletheme";
 import {Button} from "@/components/ui/button";
-import {
-  useAddress,
-  useChain,
-  useDisconnect,
-  useNetworkMismatch,
-} from "@thirdweb-dev/react";
 import {useRouter} from "next/navigation";
 import {useEffect, useState} from "react";
 import {
@@ -18,24 +12,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {useAccount, useNetwork, useSwitchNetwork} from "wagmi";
+import {disconnect} from "@wagmi/core";
+
 import {toast} from "@/components/ui/use-toast";
 
 export default function Dashboard() {
-  const chain = useChain();
-  const router = useRouter();
-  const address = useAddress();
-  const isMismatch = useNetworkMismatch();
-  const disconnect = useDisconnect();
+  const {isConnected, address} = useAccount();
+  const {chain} = useNetwork();
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const {chains, error, isLoading, pendingChainId, switchNetwork} =
+    useSwitchNetwork();
 
   useEffect(() => {
-    if (!address) {
+    if (!isConnected) {
       router.push("/connectwallet");
     }
-    if (address && isMismatch) {
+
+    if (isConnected && chain.id != 80001 && chain.id != 43113) {
       router.push("/switchnetwork");
     }
-  }, [address, isMismatch, router]);
+  }, [isConnected, chain, router]);
 
   const Disconnect = async () => {
     await disconnect();
@@ -61,6 +59,20 @@ export default function Dashboard() {
             <DropdownMenuContent>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  if (chain && chain.id === 43113) {
+                    switchNetwork(80001);
+                  } else if (chain && chain.id === 80001) {
+                    switchNetwork(43113);
+                  }
+                }}
+              >
+                Switch to{" "}
+                {chain && chain.id === 43113
+                  ? "Mumbai"
+                  : chain && chain.id === 80001 && "Avalanche"}
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={Disconnect}>
                 <p className="text-red-400">Disconnect</p>
               </DropdownMenuItem>

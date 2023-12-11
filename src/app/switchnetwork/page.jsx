@@ -1,37 +1,59 @@
 "use client";
 
 import {Button} from "@/components/ui/button";
-import {
-  useAddress,
-  useNetwork,
-  useNetworkMismatch,
-  useSwitchChain,
-} from "@thirdweb-dev/react";
-import {Mumbai} from "@thirdweb-dev/chains";
-import {useEffect} from "react";
+import {useAccount, useConnect, useDisconnect} from "wagmi";
+import {InjectedConnector} from "wagmi/connectors/injected";
+import {useNetwork} from "wagmi";
+import {useSwitchNetwork} from "wagmi";
+import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
+import {ReloadIcon} from "@radix-ui/react-icons";
 
 export default function SwitchNetwork() {
-  const switchChain = useSwitchChain();
-  const address = useAddress();
+  const [mounted, setMounted] = useState(false);
+  const {isConnected} = useAccount();
+  const {chain} = useNetwork();
+  const {chains, error, isLoading, pendingChainId, switchNetwork} =
+    useSwitchNetwork();
   const router = useRouter();
-  const isMismatch = useNetworkMismatch();
-  const [, switchNetwork] = useNetwork();
+
   useEffect(() => {
-    if (!address) {
+    if (!isConnected) {
       router.push("/connectwallet");
     }
-    if (!isMismatch && address) {
+
+    if ((chain.id == 80001 || chain.id == 43113) && isConnected) {
       router.push("/dashboard");
     }
-  }, [address, isMismatch, router]);
 
+    console.log(chain);
+  }, [isConnected, router]);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
   return (
     <div className="flex justify-center items-center flex-col h-screen w-screen">
-      <div>
-        <Button onClick={() => switchNetwork(Mumbai.chainId)}>
-          Switch Network
-        </Button>
+      <div className="flex flex-col space-y-3">
+        {chains.map((network) => {
+          if (isLoading && pendingChainId === network.id) {
+            return (
+              <Button disabled>
+                <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                Please wait
+              </Button>
+            );
+          } else {
+            return (
+              <Button
+                key={network.id}
+                onClick={() => switchNetwork?.(network.id)}
+              >
+                Switch to {network.name}
+                {isLoading && pendingChainId === network.id && " (switching)"}
+              </Button>
+            );
+          }
+        })}
+        {/* <Button onClick={() => connect()}>SwitchNetwork</Button> */}
       </div>
     </div>
   );

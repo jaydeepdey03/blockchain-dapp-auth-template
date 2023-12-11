@@ -1,40 +1,27 @@
 "use client";
 
-import {ModeToggle} from "@/components/Toggletheme";
-import {
-  ConnectWallet,
-  ThirdwebProvider,
-  coinbaseWallet,
-  metamaskWallet,
-  phantomWallet,
-  rainbowWallet,
-  safeWallet,
-  walletConnect,
-} from "@thirdweb-dev/react";
-// import * as React from "react";
+import {WagmiConfig, createConfig, configureChains} from "wagmi";
+import {avalancheFuji, polygonMumbai} from "@wagmi/core/chains";
 import {ThemeProvider as NextThemesProvider} from "next-themes";
+import {publicProvider} from "wagmi/providers/public";
+import {InjectedConnector} from "wagmi/connectors/injected";
+
+const {chains, publicClient, webSocketPublicClient} = configureChains(
+  [polygonMumbai, avalancheFuji],
+  [publicProvider()]
+);
+
+const config = createConfig({
+  autoConnect: true,
+  connectors: [new InjectedConnector({chains})],
+  publicClient,
+  webSocketPublicClient,
+});
 
 export function ThemeProvider({children, ...props}) {
   return (
-    <ThirdwebProvider
-      clientId={process.env.NEXT_PUBLIC_CLIENT_ID}
-      activeChain="mumbai"
-      supportedWallets={[
-        metamaskWallet({recommended: true}),
-        coinbaseWallet(),
-        walletConnect(),
-        safeWallet({
-          personalWallets: [
-            metamaskWallet(),
-            coinbaseWallet(),
-            walletConnect(),
-          ],
-        }),
-        rainbowWallet(),
-        phantomWallet(),
-      ]}
-    >
+    <WagmiConfig config={config}>
       <NextThemesProvider {...props}>{children}</NextThemesProvider>
-    </ThirdwebProvider>
+    </WagmiConfig>
   );
 }
