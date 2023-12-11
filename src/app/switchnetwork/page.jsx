@@ -8,6 +8,7 @@ import {useSwitchNetwork} from "wagmi";
 import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {ReloadIcon} from "@radix-ui/react-icons";
+import {toast} from "@/components/ui/use-toast";
 
 export default function SwitchNetwork() {
   const [mounted, setMounted] = useState(false);
@@ -22,12 +23,20 @@ export default function SwitchNetwork() {
       router.push("/connectwallet");
     }
 
-    if ((chain.id == 80001 || chain.id == 43113) && isConnected) {
+    if (chain && (chain.id == 80001 || chain.id == 43113) && isConnected) {
       router.push("/dashboard");
     }
 
     console.log(chain);
   }, [isConnected, router]);
+
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error in Connecting",
+      description: error.message,
+    });
+  }
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
   return (
